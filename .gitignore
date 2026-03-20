@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+cache/
+cache_*/
+notebooks/cluster_graph.html
+notebooks/cluster_report.html
+lib/

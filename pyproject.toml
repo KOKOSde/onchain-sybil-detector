@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "onchain-sybil-detector"
+version = "0.1.0"
+description = "Open-source behavioral Sybil attack detection for blockchain addresses"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "onchain-sybil-detector contributors" }
+]
+dependencies = [
+  "pandas>=1.5",
+  "numpy>=1.23",
+  "scikit-learn>=1.2,<1.6",
+  "hdbscan>=0.8.33,<0.8.41",
+  "web3>=6.0",
+  "networkx>=3.1",
+  "pyvis>=0.3.2",
+  "plotly>=5.15",
+  "umap-learn>=0.5.4",
+  "tqdm>=4.66"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.6",
+  "nbformat>=5.10",
+  "nbclient>=0.10"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E203"]
