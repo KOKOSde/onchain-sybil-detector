@@ -1,1 +1,0 @@
-{"output": "/tmp/osd_report.html", "clusters": 50}

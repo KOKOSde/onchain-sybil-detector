@@ -1,0 +1,36 @@
+{
+  "wallets": [
+    "0x0000000000000000000000000000000000a00000",
+    "0x0000000000000000000000000000000000a00001"
+  ],
+  "evidence": [
+    {
+      "type": "signal_1",
+      "sentence": "Funded from same upstream wallet (0x0000000000000000000000000000000000f00000) within 3.2 minutes.",
+      "score": 0.28
+    },
+    {
+      "type": "signal_2",
+      "sentence": "Transact in same minute-buckets across 27 windows.",
+      "score": 0.2
+    },
+    {
+      "type": "signal_3",
+      "sentence": "Near-identical gas strategy (median gas_price CV=0.003, gas_used CV=0.004).",
+      "score": 0.22
+    },
+    {
+      "type": "signal_4",
+      "sentence": "Recurring contract interaction sequence similarity: 1.00.",
+      "score": 0.2
+    }
+  ],
+  "evidence_sentences": [
+    "Funded from same upstream wallet (0x0000000000000000000000000000000000f00000) within 3.2 minutes.",
+    "Transact in same minute-buckets across 27 windows.",
+    "Near-identical gas strategy (median gas_price CV=0.003, gas_used CV=0.004).",
+    "Recurring contract interaction sequence similarity: 1.00."
+  ],
+  "confidence_score": 0.9000000000000001,
+  "linkage_strength": "strong"
+}

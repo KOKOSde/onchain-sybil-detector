@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 import networkx as nx
 import pandas as pd
@@ -58,6 +58,21 @@ def plot_cluster_graph(
     Nodes are addresses, edges are transactions, color by cluster, size by sybil_probability.
     """
 
+    output_path = Path(output_html)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    graph_html, _, _ = build_cluster_graph_html(transactions=transactions, clusters=clusters, cdn_resources="remote")
+    output_path.write_text(graph_html, encoding="utf-8")
+    return str(output_path)
+
+
+def build_cluster_graph_html(
+    transactions: pd.DataFrame,
+    clusters: pd.DataFrame,
+    cdn_resources: str = "remote",
+) -> Tuple[str, int, int]:
+    """Build pyvis graph HTML and return (html, node_count, edge_count)."""
+
     tx = transactions.copy()
     cl = clusters.copy()
 
@@ -80,21 +95,26 @@ def plot_cluster_graph(
         cluster_prob[cluster_prob["sybil_probability"] >= 0.7]["cluster_id"].astype(int).tolist()
     )
 
-    output_path = Path(output_html)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    node_count = int(graph.number_of_nodes())
+    edge_count = int(graph.number_of_edges())
 
     if Network is None:
-        # Fallback keeps report generation functional when pyvis is unavailable.
         fallback = [
             "<html><body><h3>Cluster Graph (fallback)</h3>",
             "<p>pyvis is not installed, rendering textual summary instead.</p>",
-            f"<p>nodes={graph.number_of_nodes()}, edges={graph.number_of_edges()}</p>",
+            f"<p>nodes={node_count}, edges={edge_count}</p>",
             "</body></html>",
         ]
-        output_path.write_text("".join(fallback), encoding="utf-8")
-        return str(output_path)
+        return "".join(fallback), node_count, edge_count
 
-    net = Network(height="800px", width="100%", directed=True, bgcolor="#ffffff", font_color="#222222")
+    net = Network(
+        height="800px",
+        width="100%",
+        directed=True,
+        bgcolor="#ffffff",
+        font_color="#222222",
+        cdn_resources=cdn_resources,
+    )
 
     for node in graph.nodes:
         node_info: Dict[str, object] = cluster_map.get(node, {})
@@ -117,8 +137,7 @@ def plot_cluster_graph(
         net.add_edge(src, dst, value=float(attrs.get("value", 0.0)), color="#9aa0a6")
 
     net.toggle_physics(True)
-    net.save_graph(str(output_path))
-    return str(output_path)
+    return net.generate_html(notebook=False), node_count, edge_count
 
 
 def generate_report(clusters: pd.DataFrame, format: str = "html") -> str:
@@ -207,4 +226,4 @@ def generate_report(clusters: pd.DataFrame, format: str = "html") -> str:
     return "\n".join(text_lines)
 
 
-__all__ = ["plot_cluster_graph", "generate_report"]
+__all__ = ["plot_cluster_graph", "build_cluster_graph_html", "generate_report"]

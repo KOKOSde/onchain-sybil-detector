@@ -1,5 +1,6 @@
 """Analyst report generation for onchain-sybil-detector runs."""
 
+import html
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -9,7 +10,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from .visualization import plot_cluster_graph
+from .visualization import build_cluster_graph_html
 
 
 def _ts_to_iso(ts: object) -> Optional[str]:
@@ -329,18 +330,28 @@ def generate_analyst_reports(
     md_path.write_text("\n".join(md_lines), encoding="utf-8")
 
     graph_path = out_dir / f"{stem}_graph.html"
+    graph_html = ""
+    graph_node_count = 0
+    graph_edge_count = 0
     try:
-        plot_cluster_graph(transactions=transactions, clusters=clusters, output_html=graph_path)
+        graph_html, graph_node_count, graph_edge_count = build_cluster_graph_html(
+            transactions=transactions,
+            clusters=clusters,
+            cdn_resources="remote",
+        )
+        graph_path.write_text(graph_html, encoding="utf-8")
     except Exception as exc:
-        graph_path.write_text(
+        graph_html = (
             (
                 "<html><body>"
                 "<h3>Graph unavailable</h3>"
                 f"<p>Unable to render pyvis graph: {exc}</p>"
                 "</body></html>"
-            ),
-            encoding="utf-8",
+            )
         )
+        graph_path.write_text(graph_html, encoding="utf-8")
+
+    escaped_graph_html = html.escape(graph_html, quote=True)
 
     blocks = [
         "<html><head><meta charset='utf-8'><title>OSD Analyst Report</title>",
@@ -370,7 +381,15 @@ def generate_analyst_reports(
         [
             "</tbody></table>",
             "<h2>Embedded Network Graph</h2>",
-            f"<iframe src='{graph_path.name}'></iframe>",
+            f"<p>Graph stats: nodes={graph_node_count}, edges={graph_edge_count}</p>",
+            (
+                "<iframe sandbox='allow-scripts allow-same-origin' "
+                f"srcdoc=\"{escaped_graph_html}\"></iframe>"
+            ),
+            (
+                f"<p>If your browser blocks <code>srcdoc</code>, "
+                f"open the standalone graph: <a href='{graph_path.name}'>{graph_path.name}</a></p>"
+            ),
             "</body></html>",
         ]
     )
@@ -386,4 +405,33 @@ def generate_analyst_reports(
     }
 
 
-__all__ = ["build_cluster_report_rows", "generate_analyst_reports"]
+def generate_report(
+    transactions: pd.DataFrame,
+    features: Optional[pd.DataFrame] = None,
+    clusters: Optional[pd.DataFrame] = None,
+    labels: Optional[pd.DataFrame] = None,
+    output_dir: str = "reports",
+    filename_prefix: str = "osd_demo",
+) -> Dict[str, str]:
+    """Compatibility wrapper for end-to-end analyst report generation.
+
+    The `labels` argument is accepted for compatibility but not required.
+    """
+
+    _ = labels
+    if clusters is None:
+        from .clustering import SybilDetector
+        from .feature_engineering import extract_features
+
+        features = extract_features(transactions) if features is None else features
+        clusters = SybilDetector(min_cluster_size=3, min_samples=2).fit_predict(features)
+
+    return generate_analyst_reports(
+        transactions=transactions,
+        clusters=clusters,
+        output_dir=output_dir,
+        run_name=filename_prefix,
+    )
+
+
+__all__ = ["build_cluster_report_rows", "generate_analyst_reports", "generate_report"]

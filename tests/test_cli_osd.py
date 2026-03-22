@@ -5,6 +5,9 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
+
+from datasets.synthetic_generator import generate_synthetic_sybil_network
 
 
 def _repo_root() -> Path:
@@ -24,10 +27,42 @@ def _run_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=str(cwd), env=_cli_env(), capture_output=True, text=True, check=False)
 
 
-def test_cli_simulate_scan_explain_benchmark_smoke(tmp_path: Path) -> None:
+@pytest.fixture
+def prepared_synthetic_csv(tmp_path: Path) -> dict:
+    tx, labels = generate_synthetic_sybil_network(
+        num_legit=80,
+        num_sybil_clusters=4,
+        addrs_per_cluster=8,
+        seed=123,
+    )
+    tx_csv = tmp_path / "synthetic_tx.csv"
+    labels_csv = tmp_path / "synthetic_labels.csv"
+    tx.to_csv(tx_csv, index=False)
+    labels.to_csv(labels_csv, index=False)
+    return {
+        "root": _repo_root(),
+        "tx_csv": tx_csv,
+        "labels_csv": labels_csv,
+    }
+
+
+def test_cli_help_root() -> None:
+    result = _run_cli(["--help"], cwd=_repo_root())
+    assert result.returncode == 0
+    assert "sybil-detector" in result.stdout
+
+
+@pytest.mark.parametrize("subcommand", ["scan", "simulate", "explain", "benchmark", "airdrop-scan"])
+def test_cli_help_subcommands(subcommand: str) -> None:
+    result = _run_cli([subcommand, "--help"], cwd=_repo_root())
+    assert result.returncode == 0
+    assert subcommand in result.stdout
+
+
+def test_cli_simulate_command(tmp_path: Path) -> None:
     root = _repo_root()
-    tx_csv = tmp_path / "synthetic.csv"
-    sim = _run_cli(
+    tx_csv = tmp_path / "simulated.csv"
+    result = _run_cli(
         [
             "simulate",
             "--difficulty",
@@ -43,30 +78,36 @@ def test_cli_simulate_scan_explain_benchmark_smoke(tmp_path: Path) -> None:
         ],
         cwd=root,
     )
-    assert sim.returncode == 0, sim.stderr
+    assert result.returncode == 0, result.stderr
     assert tx_csv.exists()
-    labels_csv = tx_csv.with_name(tx_csv.stem + "_labels.csv")
-    assert labels_csv.exists()
+    assert tx_csv.with_name(tx_csv.stem + "_labels.csv").exists()
 
-    report_html = tmp_path / "report.html"
-    scan = _run_cli(
-        [
-            "scan",
-            "--addresses",
-            str(tx_csv),
-            "--chain",
-            "eth",
-            "--out",
-            str(report_html),
-        ],
+    payload = json.loads(result.stdout)
+    assert payload["rows"] > 0
+
+
+def test_cli_scan_command(prepared_synthetic_csv: dict, tmp_path: Path) -> None:
+    root = prepared_synthetic_csv["root"]
+    tx_csv = prepared_synthetic_csv["tx_csv"]
+    report_html = tmp_path / "scan_report.html"
+
+    result = _run_cli(
+        ["scan", "--addresses", str(tx_csv), "--chain", "eth", "--out", str(report_html)],
         cwd=root,
     )
-    assert scan.returncode == 0, scan.stderr
+    assert result.returncode == 0, result.stderr
     assert report_html.exists()
+    payload = json.loads(result.stdout)
+    assert payload["output"].endswith("scan_report.html")
 
-    labels_df = pd.read_csv(labels_csv)
+
+def test_cli_explain_command(prepared_synthetic_csv: dict) -> None:
+    root = prepared_synthetic_csv["root"]
+    tx_csv = prepared_synthetic_csv["tx_csv"]
+    labels_df = pd.read_csv(prepared_synthetic_csv["labels_csv"])
     wallets = labels_df["address"].head(3).tolist()
-    explain = _run_cli(
+
+    result = _run_cli(
         [
             "explain",
             "--wallets",
@@ -78,13 +119,16 @@ def test_cli_simulate_scan_explain_benchmark_smoke(tmp_path: Path) -> None:
         ],
         cwd=root,
     )
-    assert explain.returncode == 0, explain.stderr
-    parsed = json.loads(explain.stdout)
+    assert result.returncode == 0, result.stderr
+    parsed = json.loads(result.stdout)
     assert "confidence_score" in parsed
     assert len(parsed["wallets"]) == 3
 
+
+def test_cli_benchmark_command(tmp_path: Path) -> None:
+    root = _repo_root()
     benchmark_csv = tmp_path / "benchmark.csv"
-    bench = _run_cli(
+    result = _run_cli(
         [
             "benchmark",
             "--out",
@@ -98,7 +142,52 @@ def test_cli_simulate_scan_explain_benchmark_smoke(tmp_path: Path) -> None:
         ],
         cwd=root,
     )
-    assert bench.returncode == 0, bench.stderr
+    assert result.returncode == 0, result.stderr
     assert benchmark_csv.exists()
     bench_df = pd.read_csv(benchmark_csv)
     assert len(bench_df) == 8
+
+
+def test_cli_airdrop_scan_command(prepared_synthetic_csv: dict, tmp_path: Path) -> None:
+    root = prepared_synthetic_csv["root"]
+    tx_csv = prepared_synthetic_csv["tx_csv"]
+    tx_df = pd.read_csv(tx_csv)
+    contract = str(tx_df["to_addr"].iloc[0])
+    out_html = tmp_path / "airdrop_report.html"
+
+    result = _run_cli(
+        [
+            "airdrop-scan",
+            "--contract",
+            contract,
+            "--chain",
+            "base",
+            "--addresses",
+            str(tx_csv),
+            "--out",
+            str(out_html),
+        ],
+        cwd=root,
+    )
+    assert result.returncode == 0, result.stderr
+    assert out_html.exists()
+    assert "Airdrop Hunter Report" in out_html.read_text(encoding="utf-8")
+
+
+def test_cli_invalid_subcommand_returns_error() -> None:
+    result = _run_cli(["unknown-cmd"], cwd=_repo_root())
+    assert result.returncode != 0
+    assert "usage" in result.stderr.lower()
+
+
+def test_cli_invalid_explain_wallets_returns_clean_error(prepared_synthetic_csv: dict) -> None:
+    root = prepared_synthetic_csv["root"]
+    tx_csv = prepared_synthetic_csv["tx_csv"]
+
+    result = _run_cli(
+        ["explain", "--wallets", "0xabc", "--chain", "eth", "--transactions", str(tx_csv)],
+        cwd=root,
+    )
+    assert result.returncode != 0
+    err = (result.stderr or result.stdout).lower()
+    assert "at least two" in err
