@@ -1,0 +1,2 @@
+/usr/bin/python3.11 -m pytest -q
+.............                                                            [100%]

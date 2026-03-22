@@ -288,7 +288,7 @@ class ChainDataFetcher(object):
         self._throttle()
         query = urllib.parse.urlencode(params)
         url = "https://api.etherscan.io/api?{}".format(query)
-        req = urllib.request.Request(url, headers={"User-Agent": "onchain-sybil-detector/0.1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "onchain-sybil-detector/0.2.0"})
         with urllib.request.urlopen(req, timeout=10) as response:
             payload = json.loads(response.read().decode("utf-8"))
 

@@ -1,0 +1,8 @@
+Level 1: precision=1.000, recall=0.942, f1=0.970
+Level 2: precision=1.000, recall=0.800, f1=0.889
+Level 3: precision=0.000, recall=0.000, f1=0.000
+Level 4: precision=1.000, recall=0.942, f1=0.970
+Level 5: precision=1.000, recall=0.942, f1=0.970
+Level 6: precision=1.000, recall=0.942, f1=0.970
+Level 7: precision=1.000, recall=0.807, f1=0.893
+Level 8: precision=1.000, recall=0.942, f1=0.970

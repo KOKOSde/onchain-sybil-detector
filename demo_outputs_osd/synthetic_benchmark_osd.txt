@@ -1,0 +1,34 @@
+{
+  "address": {
+    "precision": 1.0,
+    "recall": 0.83,
+    "f1": 0.907103825136612
+  },
+  "cluster": {
+    "precision": 1.0,
+    "recall": 0.9,
+    "f1": 0.9473684210526316
+  },
+  "baselines": {
+    "same_funder": {
+      "precision": 0.0999000999000999,
+      "recall": 0.5,
+      "f1": 0.16652789342214822
+    },
+    "same_gas": {
+      "precision": 0.7801047120418848,
+      "recall": 0.745,
+      "f1": 0.7621483375959079
+    },
+    "same_timing": {
+      "precision": 0.6548223350253807,
+      "recall": 0.645,
+      "f1": 0.6498740554156172
+    }
+  },
+  "decision_threshold": 0.7,
+  "n_addresses": 2321,
+  "n_predicted_sybil_addresses": 166,
+  "n_predicted_clusters": 10
+}
+saved demo_outputs_osd/synthetic_benchmark_osd.json

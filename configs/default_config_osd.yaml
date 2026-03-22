@@ -1,0 +1,23 @@
+chain: ethereum
+etherscan_api_key: ${ETHERSCAN_API_KEY}
+alchemy_api_key: ${ALCHEMY_API_KEY}
+
+detection:
+  min_cluster_size: 3
+  timing_weight: 0.3
+  gas_weight: 0.2
+  funding_weight: 0.35
+  sequencing_weight: 0.15
+  confidence_threshold: 0.6
+
+features:
+  timing_entropy: true
+  gas_patterns: true
+  fund_flow_graphs: true
+  hour_histograms: true
+  bridge_correlation: false  # enable for cross-chain
+
+output:
+  format: html
+  include_pyvis_graph: true
+  include_timeline: true

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onchain-sybil-detector"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source behavioral Sybil attack detection for blockchain addresses"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,8 +22,12 @@ dependencies = [
   "pyvis>=0.3.2",
   "plotly>=5.15",
   "umap-learn>=0.5.4",
-  "tqdm>=4.66"
+  "tqdm>=4.66",
+  "pyyaml>=6.0"
 ]
+
+[project.scripts]
+sybil-detector = "sybil_detector.cli_osd:main"
 
 [project.optional-dependencies]
 dev = [

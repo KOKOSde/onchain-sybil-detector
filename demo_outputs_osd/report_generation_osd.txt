@@ -1,0 +1,1 @@
+{'markdown': 'demo_outputs_osd/reports/osd_demo_analyst_report.md', 'json': 'demo_outputs_osd/reports/osd_demo_analyst_report.json', 'html': 'demo_outputs_osd/reports/osd_demo_analyst_report.html', 'graph': 'demo_outputs_osd/reports/osd_demo_graph.html'}

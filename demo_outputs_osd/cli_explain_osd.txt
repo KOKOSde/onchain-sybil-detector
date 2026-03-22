@@ -1,0 +1,31 @@
+{
+  "wallets": [
+    "0x0000000000000000000000000000000000100000",
+    "0x0000000000000000000000000000000000100001",
+    "0x0000000000000000000000000000000000100002"
+  ],
+  "evidence": [
+    {
+      "type": "signal_1",
+      "sentence": "Transact in same minute-buckets across 95 windows.",
+      "score": 0.2
+    },
+    {
+      "type": "signal_2",
+      "sentence": "Near-identical gas strategy (median gas_price CV=0.062, gas_used CV=0.044).",
+      "score": 0.22
+    },
+    {
+      "type": "signal_3",
+      "sentence": "Recurring contract interaction sequence similarity: 1.00.",
+      "score": 0.2
+    }
+  ],
+  "evidence_sentences": [
+    "Transact in same minute-buckets across 95 windows.",
+    "Near-identical gas strategy (median gas_price CV=0.062, gas_used CV=0.044).",
+    "Recurring contract interaction sequence similarity: 1.00."
+  ],
+  "confidence_score": 0.6200000000000001,
+  "linkage_strength": "moderate"
+}

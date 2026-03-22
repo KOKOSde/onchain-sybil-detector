@@ -6,7 +6,11 @@ from typing import Dict, Union
 
 import networkx as nx
 import pandas as pd
-from pyvis.network import Network
+
+try:
+    from pyvis.network import Network  # type: ignore
+except Exception:  # pragma: no cover
+    Network = None
 
 
 def _cluster_color(cluster_id: int) -> str:
@@ -76,6 +80,20 @@ def plot_cluster_graph(
         cluster_prob[cluster_prob["sybil_probability"] >= 0.7]["cluster_id"].astype(int).tolist()
     )
 
+    output_path = Path(output_html)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if Network is None:
+        # Fallback keeps report generation functional when pyvis is unavailable.
+        fallback = [
+            "<html><body><h3>Cluster Graph (fallback)</h3>",
+            "<p>pyvis is not installed, rendering textual summary instead.</p>",
+            f"<p>nodes={graph.number_of_nodes()}, edges={graph.number_of_edges()}</p>",
+            "</body></html>",
+        ]
+        output_path.write_text("".join(fallback), encoding="utf-8")
+        return str(output_path)
+
     net = Network(height="800px", width="100%", directed=True, bgcolor="#ffffff", font_color="#222222")
 
     for node in graph.nodes:
@@ -99,8 +117,6 @@ def plot_cluster_graph(
         net.add_edge(src, dst, value=float(attrs.get("value", 0.0)), color="#9aa0a6")
 
     net.toggle_physics(True)
-    output_path = Path(output_html)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
     net.save_graph(str(output_path))
     return str(output_path)
 
