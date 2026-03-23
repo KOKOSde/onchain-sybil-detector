@@ -86,6 +86,19 @@ python3 -m sybil_detector.cli_osd scan --addresses /tmp/osd_synthetic.csv --chai
 python3 -m sybil_detector.cli_osd benchmark --out /tmp/osd_benchmark.csv
 ```
 
+## Case Study: Cleaning a DeFi Airdrop
+
+The included [case study notebook](notebooks/case_study_airdrop_sybils.ipynb) 
+walks through a complete Sybil investigation:
+
+- Campaign scanning with cluster visualization
+- Deep-dive into a Sybil cluster (timeline, gas fingerprint, funding flow)
+- Plain-English evidence explanations
+- Airdrop hunter mode with per-wallet suspicion ranking
+- Adversarial resilience benchmark across 8 difficulty levels
+
+→ [Open the notebook](notebooks/case_study_airdrop_sybils.ipynb)
+
 ## Feature Catalog (25 core behavioral features + 24 temporal histogram features)
 ### Temporal
 1. `hour_of_day_entropy`
