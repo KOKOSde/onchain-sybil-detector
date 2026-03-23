@@ -6,7 +6,7 @@ Detect coordinated multi-wallet abuse on any EVM chain. Evidence-driven. Explain
 ![Tests passing](https://img.shields.io/badge/tests-51%20passing-brightgreen)
 ![Supported chains](https://img.shields.io/badge/chains-ETH%20%7C%20Base%20%7C%20BNB%20%7C%20Arbitrum%20%7C%20Optimism%20%7C%20Polygon-1f6feb)
 
-## Why This Exists
+## Problem
 Sybil abuse is one of the highest-impact threats for:
 - airdrops
 - quest/reward systems
@@ -16,6 +16,13 @@ Sybil abuse is one of the highest-impact threats for:
 
 Enterprise Sybil tooling can cost $100k+/year.
 This project is an open-source alternative designed for reproducible, evidence-driven investigations.
+
+## 📊 Case Study: Cleaning a DeFi Airdrop
+
+See the full investigation with interactive visualizations:  
+**→ [Case Study Notebook](notebooks/case_study_airdrop_sybils.ipynb)**
+
+Covers: campaign scanning, cluster deep-dive (timeline, gas fingerprint, funding flow), plain-English evidence explanations, airdrop hunter mode, and adversarial resilience testing across 8 difficulty levels.
 
 ## What This Project Is
 `onchain-sybil-detector` is a behavioral clustering framework for EVM wallets.
@@ -48,6 +55,8 @@ Data Ingestion -> Feature Engineering -> Clustering -> Coordination Scoring -> A
 Requires Python 3.9+ — check with `python3 --version`.
 
 ```bash
+git clone https://github.com/KOKOSde/onchain-sybil-detector.git
+cd onchain-sybil-detector
 python3 -m pip install -e .
 ```
 
@@ -85,19 +94,6 @@ python3 -m sybil_detector.cli_osd simulate --difficulty 1 --num-clusters 5 --wal
 python3 -m sybil_detector.cli_osd scan --addresses /tmp/osd_synthetic.csv --chain eth --out /tmp/osd_report.html
 python3 -m sybil_detector.cli_osd benchmark --out /tmp/osd_benchmark.csv
 ```
-
-## Case Study: Cleaning a DeFi Airdrop
-
-The included [case study notebook](notebooks/case_study_airdrop_sybils.ipynb) 
-walks through a complete Sybil investigation:
-
-- Campaign scanning with cluster visualization
-- Deep-dive into a Sybil cluster (timeline, gas fingerprint, funding flow)
-- Plain-English evidence explanations
-- Airdrop hunter mode with per-wallet suspicion ranking
-- Adversarial resilience benchmark across 8 difficulty levels
-
-→ [Open the notebook](notebooks/case_study_airdrop_sybils.ipynb)
 
 ## Feature Catalog (25 core behavioral features + 24 temporal histogram features)
 ### Temporal
@@ -359,8 +355,8 @@ Captured output file:
 - final pytest transcript
 
 ## Notebook Compatibility
-`notebooks/cluster_graph.html` and report outputs now use CDN-based `vis-network` references.
-No root `lib/` dependency is required for rendering.
+`notebooks/case_study_airdrop_sybils.ipynb` now saves static PNG outputs in `notebooks/images/` for GitHub rendering while keeping local interactive Plotly charts.
+Analyst report outputs use CDN-based `vis-network` references with no root `lib/` dependency.
 
 ## Common Workflows
 ### Run full offline demo

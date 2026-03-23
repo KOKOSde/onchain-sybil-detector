@@ -1,9 +1,11 @@
 __pycache__/
+pycache/
 *.pyc
 .pytest_cache/
 .ruff_cache/
 .ipynb_checkpoints/
 *.egg-info/
+.eggs/
 build/
 dist/
 cache/
