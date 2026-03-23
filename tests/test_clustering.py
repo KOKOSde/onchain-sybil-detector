@@ -1,7 +1,7 @@
 from sklearn.metrics import precision_recall_fscore_support
 
-from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector import SybilDetector, extract_features
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 
 
 def test_clustering_finds_known_sybil_groups_with_high_f1() -> None:

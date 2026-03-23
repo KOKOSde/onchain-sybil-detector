@@ -7,7 +7,6 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 
-
 METHOD_PREFIXES = ["0xa9059cbb", "0x23b872dd", "0x095ea7b3", "0x"]
 
 

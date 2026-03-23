@@ -1,5 +1,5 @@
-from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector import SybilDetector, run_benchmark
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 
 
 def test_benchmark_output_has_expected_keys() -> None:

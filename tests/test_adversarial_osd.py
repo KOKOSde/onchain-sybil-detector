@@ -1,12 +1,12 @@
 import numpy as np
 import pytest
 
+from sybil_detector import SybilDetector
+from sybil_detector.benchmark import run_benchmark
 from sybil_detector.datasets.adversarial_simulator_osd import (
     generate_adversarial_sybils,
     run_adversarial_detection_benchmark,
 )
-from sybil_detector import SybilDetector
-from sybil_detector.benchmark import run_benchmark
 
 REQUIRED_TX_COLS = {
     "address",

@@ -1,9 +1,9 @@
-from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector.airdrop_hunter_osd import (
     detect_campaign_participants,
     run_airdrop_hunter,
     scan_airdrop_campaign,
 )
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 
 
 def test_airdrop_hunter_outputs_wallet_scores_and_campaign_summary() -> None:
