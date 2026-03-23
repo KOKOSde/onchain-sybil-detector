@@ -19,10 +19,15 @@ This project is an open-source alternative designed for reproducible, evidence-d
 
 ## 📊 Case Study: Cleaning a DeFi Airdrop
 
-See the full investigation with interactive visualizations:  
+See an example of use cases, full investigation with interactive visualizations:  
 **→ [Case Study Notebook](notebooks/case_study_airdrop_sybils.ipynb)**
 
-Covers: campaign scanning, cluster deep-dive (timeline, gas fingerprint, funding flow), plain-English evidence explanations, airdrop hunter mode, and adversarial resilience testing across 8 difficulty levels.
+for few some use cases look at Case Study Notebook
+
+![Chart 6. Funding Flow into Cluster O](notebooks/images/chart_06_funding_flow.png)
+**All 15 wallets are funded from 0x0000000000000000000000000000000000f00000 within 24690.9 minutes.**
+
+Covers: campaign scanning, cluster deep-dive (timeline, gas fingerprint, funding flow), airdrop hunter mode, and adversarial resilience testing across 8 difficulty levels.
 
 ## What This Project Is
 `onchain-sybil-detector` is a behavioral clustering framework for EVM wallets.
