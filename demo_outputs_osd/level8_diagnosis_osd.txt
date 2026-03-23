@@ -1,0 +1,61 @@
+Transactions: 15250
+Labels rows: 380
+Sybil labels: 80 / 380
+Feature columns: ['address', 'hour_of_day_entropy', 'day_of_week_entropy', 'median_inter_tx_time_sec', 'std_inter_tx_time_sec', 'burst_ratio', 'first_tx_timestamp', 'active_days', 'activity_span_days', 'median_gas_price']...
+Feature shape: (1274, 51)
+Sybil feature means (first 12 numeric):
+hour_of_day_entropy         1.915913e+00
+day_of_week_entropy         2.379823e+00
+median_inter_tx_time_sec    1.094487e+05
+std_inter_tx_time_sec       1.292811e+05
+burst_ratio                 1.457606e-01
+first_tx_timestamp          1.705247e+09
+active_days                 9.387500e+00
+activity_span_days          1.752926e+01
+median_gas_price            2.026412e+10
+gas_price_cv                1.143939e-01
+gas_price_mode_ratio        1.161573e-01
+median_gas_used             5.185341e+04
+dtype: float64
+Benign feature means (first 12 numeric):
+hour_of_day_entropy         1.626236e+00
+day_of_week_entropy         1.196142e+00
+median_inter_tx_time_sec    1.718591e+05
+std_inter_tx_time_sec       1.730743e+05
+burst_ratio                 2.605795e-02
+first_tx_timestamp          1.705630e+09
+active_days                 9.363484e+00
+activity_span_days          3.455162e+01
+median_gas_price            3.245955e+10
+gas_price_cv                1.396648e-01
+gas_price_mode_ratio        5.315998e-01
+median_gas_used             6.457476e+04
+dtype: float64
+Top 12 abs mean diffs:
+median_value_wei              2.173573e+16
+median_gas_price              1.219543e+10
+first_tx_timestamp            3.827584e+05
+time_to_first_outgoing_sec    6.504435e+04
+median_inter_tx_time_sec      6.241039e+04
+std_inter_tx_time_sec         4.379315e+04
+median_gas_used               1.272135e+04
+gas_efficiency                3.143414e+01
+activity_span_days            1.702237e+01
+out_degree                    2.176822e+00
+in_degree                     1.611034e+00
+funding_source_count          1.611034e+00
+dtype: float64
+Unique clusters: [-1, 0, 1, 2, 3, 4, 5, 6, 7]
+Clustered count: 80 / 1274
+Cluster size summary:
+cluster_id
+-1    1194
+ 0      10
+ 1      10
+ 2      10
+ 3      10
+ 4      10
+ 5      10
+ 6      10
+ 7      10
+Name: count, dtype: int64

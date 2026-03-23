@@ -111,7 +111,9 @@ class SybilDetector(object):
             local += 0.10 * float(np.clip(row.get("burst_ratio", 0.0) * 2.0, 0.0, 1.0))
             local += 0.08 * float(np.clip(1.0 - row.get("gas_price_cv", 0.0), 0.0, 1.0))
             score = float(evidence.get("coordination_score", 0.0))
-            probs.append(float(np.clip(0.72 * score + local, 0.0, 0.99)))
+            delayed_boost = 0.10 * float(np.clip(evidence.get("delayed_coordination", 0.0), 0.0, 1.0))
+            funding_boost = 0.06 * float(np.clip(evidence.get("common_funding", 0.0), 0.0, 1.0))
+            probs.append(float(np.clip(0.72 * score + local + delayed_boost + funding_boost, 0.0, 0.99)))
 
         out = pd.DataFrame(
             {
@@ -137,7 +139,8 @@ class SybilDetector(object):
         size = len(self.cluster_members_.get(cid, []))
         return (
             "Cluster {cid} flagged because temporal cosine={t:.2f}, gas similarity={g:.2f}, "
-            "common funding={f:.2f}, sequential activity={s:.2f}, coordination_score={c:.2f}, "
+            "common funding={f:.2f}, sequential activity={s:.2f}, delayed coordination={d:.2f}, "
+            "coordination_score={c:.2f}, "
             "size={size}."
         ).format(
             cid=cid,
@@ -145,6 +148,7 @@ class SybilDetector(object):
             g=e.get("gas_similarity", 0.0),
             f=e.get("common_funding", 0.0),
             s=e.get("sequential_activity", 0.0),
+            d=e.get("delayed_coordination", 0.0),
             c=e.get("coordination_score", 0.0),
             size=size,
         )
@@ -223,14 +227,22 @@ class SybilDetector(object):
         else:
             first_ts = np.array([0.0])
         sequential = self._sequential_activity(first_ts)
+        delayed = self._delayed_coordination(members)
 
-        coordination = 0.3 * temporal + 0.2 * gas_similarity + 0.3 * common_funding + 0.2 * sequential
+        coordination = (
+            0.24 * temporal
+            + 0.18 * gas_similarity
+            + 0.28 * common_funding
+            + 0.14 * sequential
+            + 0.16 * delayed
+        )
 
         return {
             "temporal_correlation": float(np.clip(temporal, 0.0, 1.0)),
             "gas_similarity": float(np.clip(gas_similarity, 0.0, 1.0)),
             "common_funding": float(np.clip(common_funding, 0.0, 1.0)),
             "sequential_activity": float(np.clip(sequential, 0.0, 1.0)),
+            "delayed_coordination": float(np.clip(delayed, 0.0, 1.0)),
             "coordination_score": float(np.clip(coordination, 0.0, 1.0)),
         }
 
@@ -277,6 +289,38 @@ class SybilDetector(object):
         if np.isnan(corr):
             return 0.0
         return float(np.clip(abs(corr), 0.0, 1.0))
+
+    def _delayed_coordination(self, members: pd.DataFrame) -> float:
+        """Capture coordinated actors who spread actions across days."""
+
+        if len(members) < 2:
+            return 0.0
+
+        cadence = 0.0
+        if "median_inter_tx_time_sec" in members.columns:
+            med = pd.to_numeric(members["median_inter_tx_time_sec"], errors="coerce").replace(0, np.nan).dropna()
+            if len(med) >= 2:
+                med_log = np.log1p(med.to_numpy(dtype=float))
+                denom = max(float(np.mean(np.abs(med_log))), 1e-6)
+                cv = float(np.std(med_log) / denom)
+                cadence = float(np.clip(np.exp(-2.0 * cv), 0.0, 1.0))
+
+        day_pattern = 0.0
+        if "day_of_week_entropy" in members.columns:
+            day_entropy = pd.to_numeric(members["day_of_week_entropy"], errors="coerce").fillna(0.0).to_numpy(dtype=float)
+            if day_entropy.size >= 2:
+                spread = float(np.std(day_entropy))
+                day_pattern = float(np.clip(np.exp(-1.5 * spread), 0.0, 1.0))
+
+        span_alignment = 0.0
+        if "activity_span_days" in members.columns:
+            spans = pd.to_numeric(members["activity_span_days"], errors="coerce").fillna(0.0).to_numpy(dtype=float)
+            spans = spans[spans > 0]
+            if spans.size >= 2:
+                spread = float(np.std(np.log1p(spans)))
+                span_alignment = float(np.clip(np.exp(-2.2 * spread), 0.0, 1.0))
+
+        return float(np.clip(0.5 * cadence + 0.3 * day_pattern + 0.2 * span_alignment, 0.0, 1.0))
 
     def _top_feature_names(self, df: pd.DataFrame, numeric_cols: List[str]) -> List[List[str]]:
         med = df[numeric_cols].median(axis=0)

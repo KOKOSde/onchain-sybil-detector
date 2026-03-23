@@ -214,23 +214,23 @@ Source: `demo_outputs_osd/adversarial_benchmark.json`
 
 | Difficulty | Description | Precision | Recall | F1 | Detection Rate |
 |---|---|---:|---:|---:|---:|
-| Level 1 | Naive (same funder/gas/timing) | 1.0 | 0.925 | 0.961038961038961 | 92.5% |
-| Level 2 | Randomized timing | 1.0 | 0.925 | 0.961038961038961 | 92.5% |
-| Level 3 | Indirect funding (2-hop) | 1.0 | 0.7375 | 0.8489208633093526 | 73.75% |
-| Level 4 | Mixed gas behavior | 1.0 | 0.925 | 0.961038961038961 | 92.5% |
-| Level 5 | Intentional cluster splitting | 1.0 | 0.925 | 0.961038961038961 | 92.5% |
-| Level 6 | Chain hopping | 1.0 | 0.925 | 0.961038961038961 | 92.5% |
-| Level 7 | Burner wallets | 1.0 | 0.8522727272727273 | 0.9202453987730062 | 85.22727272727273% |
-| Level 8 | Delayed coordination | 0.0 | 0.0 | 0.0 | 0.0% |
+| Level 1 | Naive (same funder/gas/timing) | 1.0 | 1.0 | 1.0 | 100.0% |
+| Level 2 | Randomized timing | 1.0 | 0.9625 | 0.9808917197452229 | 96.25% |
+| Level 3 | Indirect funding (2-hop) | 0.9836065573770492 | 0.75 | 0.851063829787234 | 75.0% |
+| Level 4 | Mixed gas behavior | 1.0 | 1.0 | 1.0 | 100.0% |
+| Level 5 | Intentional cluster splitting | 1.0 | 1.0 | 1.0 | 100.0% |
+| Level 6 | Chain hopping | 1.0 | 1.0 | 1.0 | 100.0% |
+| Level 7 | Burner wallets | 1.0 | 0.9090909090909091 | 0.9523809523809523 | 90.9090909090909% |
+| Level 8 | Delayed coordination | 1.0 | 0.9375 | 0.967741935483871 | 93.75% |
 
 Detection Rate is computed as `recall * 100` from the benchmark artifact.
-Results from `generate_adversarial_sybils(seed=42)` with 8 clusters of 10 wallets each. Level 3 (indirect funding) is a known hard case.
+Results from `generate_adversarial_sybils(seed=42)` with 8 clusters of 10 wallets each. Level 3 (indirect funding) remains the hardest case in this run.
 
 ## Interpretation of Adversarial Results
 - Levels 1/2/4/5/6 remain highly detectable in this synthetic setup.
 - Level 3 is now recoverable but still materially harder than Level 1/2 due indirect relay funding.
-- Level 7 shows degradation under burner-wallet behavior.
-- Level 8 remains the most difficult delayed-coordination case in this benchmark setup.
+- Level 7 shows measurable degradation under burner-wallet behavior.
+- Level 8 delayed-coordination is now recoverable after delayed-cadence coordination scoring updates.
 
 ## Analyst Report Mode
 The report system emits three formats:
