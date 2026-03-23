@@ -1,6 +1,7 @@
 __pycache__/
 pycache/
 *.pyc
+.env
 .pytest_cache/
 .ruff_cache/
 .ipynb_checkpoints/
