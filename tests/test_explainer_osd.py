@@ -114,3 +114,25 @@ def test_explainer_requires_two_wallets() -> None:
     assert result["confidence_score"] == 0.0
     assert result["linkage_strength"] == "none"
     assert "Need at least two wallets" in result["evidence_sentences"][0]
+
+
+def test_explainer_rejects_unknown_wallets() -> None:
+    empty_tx = pd.DataFrame(
+        columns=[
+            "address",
+            "tx_hash",
+            "block_number",
+            "timestamp",
+            "from_addr",
+            "to_addr",
+            "value_wei",
+            "gas_price",
+            "gas_used",
+            "input_data_prefix",
+        ]
+    )
+    empty_features = pd.DataFrame(columns=["address"])
+    result = explain_wallet_linkage(["0xFAKE1", "0xFAKE2"], empty_tx, empty_features)
+    assert result["confidence_score"] == 0.0
+    assert result["linkage_strength"] == "none"
+    assert "Insufficient transaction history for analysis." in result["evidence_sentences"][0]

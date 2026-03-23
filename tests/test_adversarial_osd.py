@@ -108,6 +108,19 @@ def test_higher_difficulty_generally_reduces_detection_rates() -> None:
     assert hard_recall < easy_recall
 
 
+def test_level_3_indirect_funding_has_nonzero_detection() -> None:
+    tx, labels = generate_adversarial_sybils(
+        difficulty=3,
+        num_clusters=8,
+        wallets_per_cluster=10,
+        num_legit=300,
+        seed=42,
+    )
+    metrics = run_benchmark(SybilDetector(min_cluster_size=3, min_samples=2), tx, labels)
+    assert float(metrics["address"]["f1"]) > 0.0
+    assert float(metrics["address"]["recall"]) > 0.0
+
+
 def test_level_8_has_larger_sybil_activity_span_than_level_1() -> None:
     tx1, labels1 = generate_adversarial_sybils(
         difficulty=1,

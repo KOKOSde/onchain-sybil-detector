@@ -30,7 +30,7 @@ def _sequence_similarity(sequences: List[List[str]]) -> float:
             a = sequences[i]
             b = sequences[j]
             if not a and not b:
-                sims.append(1.0)
+                sims.append(0.0)
                 continue
             if not a or not b:
                 sims.append(0.0)
@@ -55,6 +55,17 @@ def explain_wallet_linkage(
     """
 
     normalized = _normalize_wallets(wallets)
+
+    def insufficient_history_result() -> Dict[str, object]:
+        sentence = "Insufficient transaction history for analysis."
+        return {
+            "wallets": normalized,
+            "evidence": [{"type": "insufficient_history", "sentence": sentence, "score": 0.0}],
+            "evidence_sentences": [sentence],
+            "confidence_score": 0.0,
+            "linkage_strength": "none",
+        }
+
     if len(normalized) < 2:
         return {
             "wallets": normalized,
@@ -85,6 +96,16 @@ def explain_wallet_linkage(
         | tx["to_addr"].isin(normalized)
     ].copy()
 
+    if subset.empty:
+        return insufficient_history_result()
+
+    for wallet in normalized:
+        wallet_history = subset[
+            (subset["address"] == wallet) | (subset["from_addr"] == wallet) | (subset["to_addr"] == wallet)
+        ]
+        if wallet_history.empty:
+            return insufficient_history_result()
+
     if features is None:
         try:
             fdf = extract_features(subset)
@@ -96,6 +117,23 @@ def explain_wallet_linkage(
     if not fdf.empty and "address" in fdf.columns:
         fdf["address"] = fdf["address"].astype(str).str.lower()
         fdf = fdf[fdf["address"].isin(normalized)].copy()
+    elif features is not None:
+        return insufficient_history_result()
+
+    if features is not None:
+        if fdf.empty or "address" not in fdf.columns:
+            return insufficient_history_result()
+        for wallet in normalized:
+            row = fdf[fdf["address"] == wallet]
+            if row.empty:
+                return insufficient_history_result()
+            numeric_cols = [c for c in row.columns if c not in {"address", "common_funder_address", "hour_histogram"}]
+            if numeric_cols:
+                non_zero_mass = float(
+                    row[numeric_cols].apply(pd.to_numeric, errors="coerce").fillna(0.0).abs().sum(axis=1).iloc[0]
+                )
+                if non_zero_mass <= 0:
+                    return insufficient_history_result()
 
     evidence: List[str] = []
     scores = []

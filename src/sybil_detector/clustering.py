@@ -168,7 +168,11 @@ class SybilDetector(object):
                 continue
             if float(group["hour_of_day_entropy"].median()) < 1.2:
                 continue
-            if float(group["funding_source_count"].median()) < 2.5:
+            # Indirect/relay-funded clusters can have a single dominant source.
+            # Keep the strict source-count gate unless concentration is high.
+            funding_sources = float(group["funding_source_count"].median())
+            top_source_conc = float(group["pct_funds_from_top_source"].median())
+            if funding_sources < 2.5 and top_source_conc < 0.8:
                 continue
             grouped.append(group.index.to_numpy())
 

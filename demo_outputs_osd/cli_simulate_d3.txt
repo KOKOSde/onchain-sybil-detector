@@ -1,0 +1,1 @@
+{"transactions": "/tmp/osd_synthetic_d3.csv", "labels": "/tmp/osd_synthetic_d3_labels.csv", "rows": 15488}

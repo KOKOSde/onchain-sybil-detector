@@ -1,0 +1,1 @@
+{"output": "/tmp/osd_report_d3.html", "clusters": 2}

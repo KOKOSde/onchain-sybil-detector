@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -99,6 +100,46 @@ def test_cli_scan_command(prepared_synthetic_csv: dict, tmp_path: Path) -> None:
     assert report_html.exists()
     payload = json.loads(result.stdout)
     assert payload["output"].endswith("scan_report.html")
+
+
+def test_cli_simulate_then_scan_finds_clusters(tmp_path: Path) -> None:
+    root = _repo_root()
+    tx_csv = tmp_path / "pipeline_synthetic.csv"
+    report_html = tmp_path / "pipeline_report.html"
+
+    simulate = _run_cli(
+        [
+            "simulate",
+            "--difficulty",
+            "1",
+            "--num-clusters",
+            "5",
+            "--wallets-per-cluster",
+            "10",
+            "--num-legit",
+            "120",
+            "--seed",
+            "42",
+            "--out",
+            str(tx_csv),
+        ],
+        cwd=root,
+    )
+    assert simulate.returncode == 0, simulate.stderr
+    assert tx_csv.exists()
+
+    scan = _run_cli(
+        ["scan", "--addresses", str(tx_csv), "--chain", "eth", "--out", str(report_html)],
+        cwd=root,
+    )
+    assert scan.returncode == 0, scan.stderr
+    payload = json.loads(scan.stdout)
+    assert int(payload["clusters"]) > 0
+
+    html = report_html.read_text(encoding="utf-8")
+    match = re.search(r"Clusters analyzed:\s*(\d+)", html)
+    assert match is not None
+    assert int(match.group(1)) > 0
 
 
 def test_cli_explain_command(prepared_synthetic_csv: dict) -> None:

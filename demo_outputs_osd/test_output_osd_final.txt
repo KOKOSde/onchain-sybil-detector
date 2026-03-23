@@ -1,18 +1,18 @@
 ============================= test session starts ==============================
-platform linux -- Python 3.9.20, pytest-8.4.2, pluggy-1.6.0
+platform linux -- Python 3.11.13, pytest-9.0.2, pluggy-1.6.0
 rootdir: /scratch/fkalghan/circuit_discovery_and_supression/graphs_ai_psych/onchain-sybil-detector
 configfile: pyproject.toml
-plugins: anyio-4.12.0
-collected 48 items
+plugins: anyio-4.12.1, cov-7.1.0
+collected 51 items
 
-tests/test_adversarial_osd.py ....................                       [ 41%]
+tests/test_adversarial_osd.py .....................                      [ 41%]
 tests/test_airdrop_hunter_osd.py ..                                      [ 45%]
 tests/test_benchmark.py .                                                [ 47%]
-tests/test_chains_osd.py ..                                              [ 52%]
-tests/test_cli_osd.py .............                                      [ 79%]
-tests/test_clustering.py .                                               [ 81%]
-tests/test_explainer_osd.py ...                                          [ 87%]
-tests/test_feature_engineering.py .                                      [ 89%]
+tests/test_chains_osd.py ..                                              [ 50%]
+tests/test_cli_osd.py ..............                                     [ 78%]
+tests/test_clustering.py .                                               [ 80%]
+tests/test_explainer_osd.py ....                                         [ 88%]
+tests/test_feature_engineering.py .                                      [ 90%]
 tests/test_report_osd.py .....                                           [100%]
 
-======================== 48 passed in 108.53s (0:01:48) ========================
+======================== 51 passed in 163.18s (0:02:43) ========================

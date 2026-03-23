@@ -1,7 +1,7 @@
 """Feature engineering for behavioral Sybil analysis."""
 
 
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional, Set
 
 import numpy as np
 import pandas as pd
@@ -108,7 +108,89 @@ def _required_columns_present(transactions: pd.DataFrame) -> None:
         raise ValueError(f"transactions is missing required columns: {missing}")
 
 
-def _build_address_features(address: str, group: pd.DataFrame) -> Dict[str, object]:
+def _compute_funding_signatures(tx: pd.DataFrame) -> Dict[str, str]:
+    """Build per-address funding signatures by tracing through relay hops.
+
+    The default signature is the direct dominant funding source. For relay-style
+    nodes (few inbound sources, broad fanout), we trace up to 2 upstream hops so
+    indirect funding chains share the same ancestor signature.
+    """
+
+    canonical = tx.sort_values("timestamp").drop_duplicates(subset=["tx_hash"], keep="first")
+    if canonical.empty:
+        return {}
+
+    incoming_by_target: Dict[str, pd.DataFrame] = {
+        str(addr): grp.copy()
+        for addr, grp in canonical.groupby("to_addr", sort=False)
+    }
+    in_source_count = canonical.groupby("to_addr")["from_addr"].nunique().to_dict()
+    in_tx_count = canonical.groupby("to_addr").size().to_dict()
+    out_target_count = canonical.groupby("from_addr")["to_addr"].nunique().to_dict()
+    out_tx_count = canonical.groupby("from_addr").size().to_dict()
+    address_activity = canonical.groupby("address").size().to_dict()
+    first_edge_ts = canonical.groupby(["from_addr", "to_addr"])["timestamp"].min().to_dict()
+    first_incoming_ts = canonical.groupby("to_addr")["timestamp"].min().to_dict()
+
+    def dominant_source(target: str, cutoff_ts: Optional[int] = None) -> str:
+        incoming = incoming_by_target.get(str(target))
+        if incoming is None or incoming.empty:
+            return ""
+        scoped = incoming
+        if cutoff_ts is not None:
+            scoped = incoming[incoming["timestamp"] <= int(cutoff_ts)]
+            if scoped.empty:
+                scoped = incoming
+        scoped = scoped[scoped["from_addr"] != str(target)]
+        if scoped.empty:
+            return ""
+        src_values = scoped.groupby("from_addr")["value_wei"].sum()
+        if src_values.empty:
+            return ""
+        return str(src_values.idxmax())
+
+    def is_relay_candidate(address: str) -> bool:
+        in_sources = int(in_source_count.get(address, 0))
+        in_txs = int(in_tx_count.get(address, 0))
+        out_targets = int(out_target_count.get(address, 0))
+        out_txs = int(out_tx_count.get(address, 0))
+        return bool(in_sources <= 2 and in_txs <= 6 and out_targets >= 4 and out_txs >= 4)
+
+    signatures: Dict[str, str] = {}
+    all_addresses: Set[str] = set(canonical["address"].astype(str).tolist())
+    for address in sorted(all_addresses):
+        direct = dominant_source(address, cutoff_ts=int(first_incoming_ts.get(address, 0) or 0))
+        signature = direct
+        if int(address_activity.get(address, 0)) < 6:
+            signatures[address] = signature or direct
+            continue
+        hop_source = direct
+        cutoff_ts = int(first_incoming_ts.get(address, 0) or 0)
+        visited: Set[str] = {address}
+
+        for _ in range(2):
+            if not hop_source or hop_source in visited or not is_relay_candidate(hop_source):
+                break
+            visited.add(hop_source)
+            parent = dominant_source(hop_source, cutoff_ts=cutoff_ts if cutoff_ts > 0 else None)
+            if not parent or parent in visited:
+                break
+            signature = parent
+            edge_ts = first_edge_ts.get((parent, hop_source))
+            if edge_ts is not None:
+                cutoff_ts = int(edge_ts)
+            hop_source = parent
+
+        signatures[address] = signature or direct
+
+    return signatures
+
+
+def _build_address_features(
+    address: str,
+    group: pd.DataFrame,
+    funding_signatures: Dict[str, str],
+) -> Dict[str, object]:
     group = group.sort_values("timestamp").copy()
     timestamps = group["timestamp"].astype(int).to_numpy()
     values = group["value_wei"].astype(float).to_numpy()
@@ -177,7 +259,7 @@ def _build_address_features(address: str, group: pd.DataFrame) -> Dict[str, obje
         "in_degree": float(incoming["from_addr"].nunique()),
         "out_degree": float(outgoing["to_addr"].nunique()),
         "self_loop_count": float(((group["from_addr"] == address) & (group["to_addr"] == address)).sum()),
-        "common_funder_address": top_source,
+        "common_funder_address": funding_signatures.get(address, top_source),
         "pct_funds_from_top_source": float(top_source_ratio),
         "time_to_first_outgoing_sec": time_to_first_out,
         "funding_source_count": float(incoming["from_addr"].nunique()),
@@ -203,9 +285,11 @@ def extract_features(transactions: pd.DataFrame) -> pd.DataFrame:
     tx["gas_price"] = pd.to_numeric(tx["gas_price"], errors="coerce").fillna(0).astype(float)
     tx["gas_used"] = pd.to_numeric(tx["gas_used"], errors="coerce").fillna(0).astype(float)
 
+    funding_signatures = _compute_funding_signatures(tx)
+
     rows = []
     for address, group in tx.groupby("address", sort=True):
-        rows.append(_build_address_features(address, group))
+        rows.append(_build_address_features(address, group, funding_signatures))
 
     features = pd.DataFrame(rows)
     numeric_cols = [c for c in FEATURE_COLUMNS if c != "common_funder_address"]

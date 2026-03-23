@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
@@ -18,6 +19,8 @@ import yaml
 from sybil_detector import SybilDetector, extract_features
 from sybil_detector.data_ingestion import ChainDataFetcher
 from sybil_detector.visualization import generate_report
+
+warnings.filterwarnings("ignore", message=".*networkx backend.*")
 
 TX_REQUIRED_COLUMNS = {
     "address",
@@ -207,7 +210,8 @@ def cmd_scan(args: argparse.Namespace) -> int:
         report = generate_report(clusters, format="html" if out.suffix.lower() == ".html" else "text")
         out.write_text(report, encoding="utf-8")
 
-    print(json.dumps({"output": str(out), "clusters": int((clusters["cluster_id"] != -1).sum())}))
+    cluster_count = int(clusters.loc[clusters["cluster_id"] != -1, "cluster_id"].nunique())
+    print(json.dumps({"output": str(out), "clusters": cluster_count}))
     return 0
 
 
