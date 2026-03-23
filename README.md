@@ -45,6 +45,8 @@ Data Ingestion -> Feature Engineering -> Clustering -> Coordination Scoring -> A
 - Report layer emits machine-readable and analyst-readable artifacts.
 
 ## Installation
+Requires Python 3.9+ — check with `python3 --version`.
+
 ```bash
 python3 -m pip install -e .
 ```
@@ -65,7 +67,7 @@ export ALCHEMY_API_KEY=your_key
 
 ## Quickstart (Python API)
 ```python
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector import SybilDetector, extract_features, run_benchmark
 
 tx, labels = generate_synthetic_sybil_network(seed=42)
@@ -143,7 +145,7 @@ Targets:
 
 Python example:
 ```python
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector.airdrop_hunter_osd import run_airdrop_hunter
 
 tx, _ = generate_synthetic_sybil_network(seed=42)
@@ -161,12 +163,12 @@ Output includes:
 ## Multi-Chain Support
 | Chain | Alias | Explorer API Base | Typical Block Time |
 |---|---|---|---:|
-| Ethereum | `eth` | `https://api.etherscan.io/api` | 12.0s |
-| Base | `base` | `https://api.basescan.org/api` | 2.0s |
-| BNB Chain | `bnb`, `bsc` | `https://api.bscscan.com/api` | 3.0s |
-| Arbitrum | `arb` | `https://api.arbiscan.io/api` | 0.26s |
-| Optimism | `op` | `https://api-optimistic.etherscan.io/api` | 2.0s |
-| Polygon | `matic` | `https://api.polygonscan.com/api` | 2.1s |
+| Ethereum | `eth` | `https://api.etherscan.io/v2/api?chainid=1` | 12.0s |
+| Base | `base` | `https://api.etherscan.io/v2/api?chainid=8453` | 2.0s |
+| BNB Chain | `bnb`, `bsc` | `https://api.etherscan.io/v2/api?chainid=56` | 3.0s |
+| Arbitrum | `arb` | `https://api.etherscan.io/v2/api?chainid=42161` | 0.26s |
+| Optimism | `op` | `https://api.etherscan.io/v2/api?chainid=10` | 2.0s |
+| Polygon | `matic` | `https://api.etherscan.io/v2/api?chainid=137` | 2.1s |
 
 Cross-chain signals include:
 - bridge timing correlation
@@ -175,53 +177,76 @@ Cross-chain signals include:
 - repeated wallet-generation patterns
 - common funding sources across chains
 
+Public chain list API:
+- `sybil_detector.chains_osd.SUPPORTED_CHAINS`
+- `sybil_detector.chains_osd.list_supported_chains()`
+
 ## CLI Example Output
 All snippets below come from real files in `demo_outputs_osd/`.
 
 ### `simulate` Example Output
-Source: `demo_outputs_osd/cli_simulate_d1.txt`
+Source: `demo_outputs_osd/cli_simulate_example_output.txt`
 
 ```text
-$ python3 -m sybil_detector.cli_osd simulate --difficulty 1 --num-clusters 5 --wallets-per-cluster 10 --out /tmp/osd_verify_d1.csv
-{"transactions": "/tmp/osd_verify_d1.csv", "labels": "/tmp/osd_verify_d1_labels.csv", "rows": 14536}
+$ python3 -m sybil_detector.cli_osd simulate --difficulty 1 --num-clusters 5 --wallets-per-cluster 10 --out /tmp/osd_synthetic.csv
+{"transactions": "/tmp/osd_synthetic.csv", "labels": "/tmp/osd_synthetic_labels.csv", "rows": 14536}
+$ python3 - <<"PY"
+import pandas as pd
+tx = pd.read_csv("/tmp/osd_synthetic.csv")
+print(tx.shape)
+print(tx[["address","tx_hash","timestamp"]].head(3).to_string(index=False))
+(14536, 11)
+                                   address                                                            tx_hash  timestamp
+0x0000000000000000000000000000000000a00000 0x0000002a000000000000000000000000000000000000000000000000000019f7 1704068565
+0x0000000000000000000000000000000000f00000 0x0000002a000000000000000000000000000000000000000000000000000019f7 1704068565
+0x0000000000000000000000000000000000a00001 0x0000002a00000000000000000000000000000000000000000000000000001a06 1704068759
 ```
 
 ### `scan` Example Output
-Source: `demo_outputs_osd/cli_scan_d1.txt`
+Source: `demo_outputs_osd/cli_scan_example_output.txt`
 
 ```text
-$ python3 -m sybil_detector.cli_osd scan --addresses /tmp/osd_verify_d1.csv --chain eth --out /tmp/osd_verify_d1_report.html
-{"output": "/tmp/osd_verify_d1_report.html", "clusters": 5}
+$ python3 -m sybil_detector.cli_osd scan --addresses /tmp/osd_synthetic.csv --chain eth --out /tmp/osd_report.html
+{"output": "/tmp/osd_report.html", "clusters": 5}
+$ python3 - <<"PY"
+from pathlib import Path
+html = Path("/tmp/osd_report.html").read_text()
+print("clusters_tag", "Clusters analyzed:" in html)
+print("has_graph", "vis.Network" in html)
+clusters_tag True
+has_graph True
 ```
 
 ### `benchmark` Example Output
-Source: `demo_outputs_osd/cli_benchmark_osd.txt`
+Source: `demo_outputs_osd/cli_benchmark_example_output.txt`
 
 ```text
 $ python3 -m sybil_detector.cli_osd benchmark --out /tmp/osd_benchmark.csv
 {"output": "/tmp/osd_benchmark.csv", "levels": 8}
 $ head -n 6 /tmp/osd_benchmark.csv
 level,address_precision,address_recall,address_f1,cluster_precision,cluster_recall,cluster_f1,n_predicted_sybil_addresses
-level_1,1.0,0.9,0.9473684210526315,1.0,0.9,0.9473684210526316,108.0
-level_2,1.0,0.75,0.8571428571428571,1.0,0.8,0.888888888888889,90.0
-level_3,1.0,0.19166666666666668,0.32167832167832167,1.0,0.2,0.33333333333333337,23.0
-level_4,1.0,0.85,0.918918918918919,1.0,0.9,0.9473684210526316,102.0
-level_5,1.0,0.9,0.9473684210526315,1.0,0.225,0.36734693877551017,108.0
+level_1,0.9917355371900827,1.0,0.995850622406639,1.0,1.0,1.0,121.0
+level_2,1.0,0.8833333333333333,0.9380530973451328,1.0,0.9,0.9473684210526316,106.0
+level_3,0.96,0.2,0.3310344827586207,1.0,0.2,0.33333333333333337,25.0
+level_4,0.9917355371900827,1.0,0.995850622406639,1.0,1.0,1.0,121.0
+level_5,0.9917355371900827,1.0,0.995850622406639,1.0,0.25,0.4,121.0
 ```
 
 ## Adversarial Benchmark Results
-Source: `demo_outputs_osd/adversarial_benchmark.json`
+Source: `demo_outputs_osd/adversarial_benchmark.json` and generated via `scripts/generate_benchmark_table.py`.
 
+<!-- ADVERSARIAL_TABLE_START -->
 | Difficulty | Description | Precision | Recall | F1 | Detection Rate |
 |---|---|---:|---:|---:|---:|
-| Level 1 | Naive (same funder/gas/timing) | 1.0 | 1.0 | 1.0 | 100.0% |
-| Level 2 | Randomized timing | 1.0 | 0.9625 | 0.9808917197452229 | 96.25% |
-| Level 3 | Indirect funding (2-hop) | 0.9836065573770492 | 0.75 | 0.851063829787234 | 75.0% |
-| Level 4 | Mixed gas behavior | 1.0 | 1.0 | 1.0 | 100.0% |
-| Level 5 | Intentional cluster splitting | 1.0 | 1.0 | 1.0 | 100.0% |
-| Level 6 | Chain hopping | 1.0 | 1.0 | 1.0 | 100.0% |
-| Level 7 | Burner wallets | 1.0 | 0.9090909090909091 | 0.9523809523809523 | 90.9090909090909% |
-| Level 8 | Delayed coordination | 1.0 | 0.9375 | 0.967741935483871 | 93.75% |
+| Level 1 | Naive (same funder/gas/timing) | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 2 | Randomized timing | 1.0000 | 0.9625 | 0.9809 | 96.25% |
+| Level 3 | Indirect funding (2-hop) | 1.0000 | 0.7500 | 0.8571 | 75.00% |
+| Level 4 | Mixed gas behavior | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 5 | Intentional cluster splitting | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 6 | Chain hopping | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 7 | Burner wallets | 1.0000 | 0.9091 | 0.9524 | 90.91% |
+| Level 8 | Delayed coordination | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+<!-- ADVERSARIAL_TABLE_END -->
 
 Detection Rate is computed as `recall * 100` from the benchmark artifact.
 Results from `generate_adversarial_sybils(seed=42)` with 8 clusters of 10 wallets each. Level 3 (indirect funding) remains the hardest case in this run.
@@ -340,7 +365,7 @@ make test
 
 ### Explain wallet linkage
 ```python
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector.explainer_osd import explain_wallet_linkage
 
 tx, _ = generate_synthetic_sybil_network(seed=42)

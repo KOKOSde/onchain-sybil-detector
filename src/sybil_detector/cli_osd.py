@@ -56,7 +56,7 @@ def _default_config_path() -> Path:
 
 def _load_adversarial_module():
     try:
-        from datasets import adversarial_simulator_osd as adv_mod  # type: ignore
+        from sybil_detector.datasets import adversarial_simulator_osd as adv_mod  # type: ignore
         return adv_mod
     except Exception:
         root = Path(__file__).resolve().parents[2]
@@ -134,10 +134,10 @@ def _load_addresses_or_transactions(path: str) -> Tuple[pd.DataFrame, List[str]]
     return pd.DataFrame(), sorted(set(addresses))
 
 
-def _build_fetcher(config: Dict[str, object], chain: str) -> ChainDataFetcher:
+def _build_fetcher(config: Dict[str, object], chain: str, offline: bool = False) -> ChainDataFetcher:
     etherscan_key = os.getenv("ETHERSCAN_API_KEY") or str(config.get("etherscan_api_key", "")).strip() or None
     rpc = _resolve_chain_rpc(chain, config)
-    return ChainDataFetcher(rpc_url=rpc, etherscan_key=etherscan_key, cache_dir="cache")
+    return ChainDataFetcher(rpc_url=rpc, etherscan_key=etherscan_key, cache_dir="cache", chain=chain, offline=offline)
 
 
 def _safe_copy(src: Path, dst: Path) -> None:
@@ -179,7 +179,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
 
     tx_df, addresses = _load_addresses_or_transactions(args.addresses)
     if tx_df.empty:
-        fetcher = _build_fetcher(config, chain)
+        fetcher = _build_fetcher(config, chain, offline=bool(args.offline))
         tx_df = fetcher.fetch_transactions(addresses, max_blocks_back=int(args.max_blocks_back))
 
     features = extract_features(tx_df)
@@ -225,7 +225,7 @@ def cmd_explain(args: argparse.Namespace) -> int:
     if args.transactions:
         tx_df = pd.read_csv(args.transactions)
     else:
-        fetcher = _build_fetcher(config, chain)
+        fetcher = _build_fetcher(config, chain, offline=bool(args.offline))
         tx_df = fetcher.fetch_transactions(wallets, max_blocks_back=int(args.max_blocks_back))
 
     try:
@@ -287,7 +287,7 @@ def cmd_airdrop_scan(args: argparse.Namespace) -> int:
     if args.addresses:
         tx_df, addresses = _load_addresses_or_transactions(args.addresses)
         if tx_df.empty:
-            fetcher = _build_fetcher(config, chain)
+            fetcher = _build_fetcher(config, chain, offline=bool(args.offline))
             tx_df = fetcher.fetch_transactions(addresses, max_blocks_back=int(args.max_blocks_back))
     else:
         adv_mod = _load_adversarial_module()
@@ -346,6 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--out", required=True)
     scan.add_argument("--config", default=None)
     scan.add_argument("--max-blocks-back", default=200000, type=int)
+    scan.add_argument("--offline", action="store_true", help="Use synthetic/cache offline mode instead of live APIs")
     scan.set_defaults(func=cmd_scan)
 
     sim = sub.add_parser("simulate", help="Generate adversarial synthetic dataset")
@@ -364,6 +365,7 @@ def build_parser() -> argparse.ArgumentParser:
     explain.add_argument("--transactions", default=None, help="Optional transaction CSV")
     explain.add_argument("--config", default=None)
     explain.add_argument("--max-blocks-back", default=200000, type=int)
+    explain.add_argument("--offline", action="store_true", help="Use synthetic/cache offline mode instead of live APIs")
     explain.set_defaults(func=cmd_explain)
 
     bench = sub.add_parser("benchmark", help="Run adversarial benchmark 1..8")
@@ -380,6 +382,7 @@ def build_parser() -> argparse.ArgumentParser:
     airdrop.add_argument("--addresses", default=None, help="Optional participant CSV")
     airdrop.add_argument("--config", default=None)
     airdrop.add_argument("--max-blocks-back", default=200000, type=int)
+    airdrop.add_argument("--offline", action="store_true", help="Use synthetic/cache offline mode instead of live APIs")
     airdrop.add_argument("--out", required=True)
     airdrop.set_defaults(func=cmd_airdrop_scan)
 

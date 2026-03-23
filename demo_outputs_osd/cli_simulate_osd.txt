@@ -1,8 +1,1 @@
-$ python3 -m sybil_detector.cli_osd simulate --difficulty 1 --num-clusters 5 --wallets-per-cluster 10 --out /tmp/osd_synthetic.csv
 {"transactions": "/tmp/osd_synthetic.csv", "labels": "/tmp/osd_synthetic_labels.csv", "rows": 14536}
-$ ls -lh /tmp/osd_synthetic.csv /tmp/osd_synthetic_labels.csv
--rw-r----- 1 fkalghan grp_yyang305 3.8M Mar 22 03:47 /tmp/osd_synthetic.csv
--rw-r----- 1 fkalghan grp_yyang305  20K Mar 22 03:47 /tmp/osd_synthetic_labels.csv
-$ head -n 2 /tmp/osd_synthetic_labels.csv
-address,is_sybil,cluster_id,operator_id,difficulty_level,difficulty_tags
-0x0000000000000000000000000000000000100000,0,-1,-1,1,L1

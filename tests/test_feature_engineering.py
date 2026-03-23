@@ -1,6 +1,6 @@
 import numpy as np
 
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector.feature_engineering import FEATURE_COLUMNS, extract_features
 
 

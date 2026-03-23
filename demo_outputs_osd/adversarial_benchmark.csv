@@ -1,0 +1,9 @@
+level,description,precision,recall,f1,detection_rate
+1,Naive (same funder/gas/timing),1.0,1.0,1.0,100.0
+2,Randomized timing,1.0,0.9625,0.9808917197452229,96.25
+3,Indirect funding (2-hop),1.0,0.75,0.8571428571428571,75.0
+4,Mixed gas behavior,1.0,1.0,1.0,100.0
+5,Intentional cluster splitting,1.0,1.0,1.0,100.0
+6,Chain hopping,1.0,1.0,1.0,100.0
+7,Burner wallets,1.0,0.9090909090909091,0.9523809523809523,90.9090909090909
+8,Delayed coordination,1.0,1.0,1.0,100.0

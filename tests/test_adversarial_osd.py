@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from datasets.adversarial_simulator_osd import (
+from sybil_detector.datasets.adversarial_simulator_osd import (
     generate_adversarial_sybils,
     run_adversarial_detection_benchmark,
 )

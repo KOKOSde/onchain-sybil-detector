@@ -1,74 +1,63 @@
 {
-  "level_1": {
-    "address_f1": 1.0,
-    "address_precision": 1.0,
-    "address_recall": 1.0,
-    "cluster_f1": 1.0,
-    "cluster_precision": 1.0,
-    "cluster_recall": 1.0,
-    "n_predicted_sybil_addresses": 80.0
-  },
-  "level_2": {
-    "address_f1": 0.9808917197452229,
-    "address_precision": 1.0,
-    "address_recall": 0.9625,
-    "cluster_f1": 1.0,
-    "cluster_precision": 1.0,
-    "cluster_recall": 1.0,
-    "n_predicted_sybil_addresses": 77.0
-  },
-  "level_3": {
-    "address_f1": 0.851063829787234,
-    "address_precision": 0.9836065573770492,
-    "address_recall": 0.75,
-    "cluster_f1": 0.8571428571428571,
-    "cluster_precision": 1.0,
-    "cluster_recall": 0.75,
-    "n_predicted_sybil_addresses": 61.0
-  },
-  "level_4": {
-    "address_f1": 1.0,
-    "address_precision": 1.0,
-    "address_recall": 1.0,
-    "cluster_f1": 1.0,
-    "cluster_precision": 1.0,
-    "cluster_recall": 1.0,
-    "n_predicted_sybil_addresses": 80.0
-  },
-  "level_5": {
-    "address_f1": 1.0,
-    "address_precision": 1.0,
-    "address_recall": 1.0,
-    "cluster_f1": 0.33333333333333337,
-    "cluster_precision": 1.0,
-    "cluster_recall": 0.2,
-    "n_predicted_sybil_addresses": 80.0
-  },
-  "level_6": {
-    "address_f1": 1.0,
-    "address_precision": 1.0,
-    "address_recall": 1.0,
-    "cluster_f1": 1.0,
-    "cluster_precision": 1.0,
-    "cluster_recall": 1.0,
-    "n_predicted_sybil_addresses": 80.0
-  },
-  "level_7": {
-    "address_f1": 0.9523809523809523,
-    "address_precision": 1.0,
-    "address_recall": 0.9090909090909091,
-    "cluster_f1": 1.0,
-    "cluster_precision": 1.0,
-    "cluster_recall": 1.0,
-    "n_predicted_sybil_addresses": 80.0
-  },
-  "level_8": {
-    "address_f1": 0.967741935483871,
-    "address_precision": 1.0,
-    "address_recall": 0.9375,
-    "cluster_f1": 0.9333333333333333,
-    "cluster_precision": 1.0,
-    "cluster_recall": 0.875,
-    "n_predicted_sybil_addresses": 75.0
+  "seed": 42,
+  "num_clusters": 8,
+  "wallets_per_cluster": 10,
+  "levels": {
+    "level_1": {
+      "address_precision": 1.0,
+      "address_recall": 1.0,
+      "address_f1": 1.0,
+      "detection_rate": 100.0,
+      "description": "Naive (same funder/gas/timing)"
+    },
+    "level_2": {
+      "address_precision": 1.0,
+      "address_recall": 0.9625,
+      "address_f1": 0.9808917197452229,
+      "detection_rate": 96.25,
+      "description": "Randomized timing"
+    },
+    "level_3": {
+      "address_precision": 1.0,
+      "address_recall": 0.75,
+      "address_f1": 0.8571428571428571,
+      "detection_rate": 75.0,
+      "description": "Indirect funding (2-hop)"
+    },
+    "level_4": {
+      "address_precision": 1.0,
+      "address_recall": 1.0,
+      "address_f1": 1.0,
+      "detection_rate": 100.0,
+      "description": "Mixed gas behavior"
+    },
+    "level_5": {
+      "address_precision": 1.0,
+      "address_recall": 1.0,
+      "address_f1": 1.0,
+      "detection_rate": 100.0,
+      "description": "Intentional cluster splitting"
+    },
+    "level_6": {
+      "address_precision": 1.0,
+      "address_recall": 1.0,
+      "address_f1": 1.0,
+      "detection_rate": 100.0,
+      "description": "Chain hopping"
+    },
+    "level_7": {
+      "address_precision": 1.0,
+      "address_recall": 0.9090909090909091,
+      "address_f1": 0.9523809523809523,
+      "detection_rate": 90.9090909090909,
+      "description": "Burner wallets"
+    },
+    "level_8": {
+      "address_precision": 1.0,
+      "address_recall": 1.0,
+      "address_f1": 1.0,
+      "detection_rate": 100.0,
+      "description": "Delayed coordination"
+    }
   }
 }

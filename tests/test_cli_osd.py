@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 
 
 def _repo_root() -> Path:

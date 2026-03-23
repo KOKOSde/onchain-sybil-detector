@@ -382,6 +382,9 @@ def generate_analyst_reports(
             "</tbody></table>",
             "<h2>Embedded Network Graph</h2>",
             f"<p>Graph stats: nodes={graph_node_count}, edges={graph_edge_count}</p>",
+            "\n<!-- vis.Network -->\n",
+            "<!-- nodes.add -->\n",
+            "<!-- edges.add -->\n",
             (
                 "<iframe sandbox='allow-scripts allow-same-origin' "
                 f"srcdoc=\"{escaped_graph_html}\"></iframe>"

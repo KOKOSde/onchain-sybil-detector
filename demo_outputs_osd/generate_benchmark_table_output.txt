@@ -1,0 +1,14 @@
+| Difficulty | Description | Precision | Recall | F1 | Detection Rate |
+|---|---|---:|---:|---:|---:|
+| Level 1 | Naive (same funder/gas/timing) | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 2 | Randomized timing | 1.0000 | 0.9625 | 0.9809 | 96.25% |
+| Level 3 | Indirect funding (2-hop) | 1.0000 | 0.7500 | 0.8571 | 75.00% |
+| Level 4 | Mixed gas behavior | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 5 | Intentional cluster splitting | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 6 | Chain hopping | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+| Level 7 | Burner wallets | 1.0000 | 0.9091 | 0.9524 | 90.91% |
+| Level 8 | Delayed coordination | 1.0000 | 1.0000 | 1.0000 | 100.00% |
+
+Wrote: demo_outputs_osd/adversarial_benchmark.json
+Wrote: demo_outputs_osd/adversarial_benchmark.csv
+Wrote: demo_outputs_osd/adversarial_benchmark_table.md

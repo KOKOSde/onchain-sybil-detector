@@ -42,6 +42,7 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["sybil_detector*"]
 
 [tool.pytest.ini_options]
 addopts = "-q"

@@ -20,46 +20,48 @@ CHAIN_REGISTRY: Dict[str, ChainConfig] = {
     "ethereum": ChainConfig(
         name="ethereum",
         aliases=["eth", "ethereum", "mainnet"],
-        explorer_api_base="https://api.etherscan.io/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=1",
         block_time_sec=12.0,
         gas_profile="Broad gas distribution, frequent priority fee spikes.",
     ),
     "base": ChainConfig(
         name="base",
         aliases=["base"],
-        explorer_api_base="https://api.basescan.org/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=8453",
         block_time_sec=2.0,
         gas_profile="Low median gas with occasional bursty spikes around sequencer load.",
     ),
     "bnb": ChainConfig(
         name="bnb",
         aliases=["bnb", "bsc", "bnbchain"],
-        explorer_api_base="https://api.bscscan.com/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=56",
         block_time_sec=3.0,
         gas_profile="Generally stable gas; synchronized bot activity common in farming windows.",
     ),
     "arbitrum": ChainConfig(
         name="arbitrum",
         aliases=["arbitrum", "arb"],
-        explorer_api_base="https://api.arbiscan.io/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=42161",
         block_time_sec=0.26,
         gas_profile="Very low/flat gas, bursts around batch posting windows.",
     ),
     "optimism": ChainConfig(
         name="optimism",
         aliases=["optimism", "op"],
-        explorer_api_base="https://api-optimistic.etherscan.io/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=10",
         block_time_sec=2.0,
         gas_profile="Low baseline gas; transaction sequencing can expose coordinated automation.",
     ),
     "polygon": ChainConfig(
         name="polygon",
         aliases=["polygon", "matic"],
-        explorer_api_base="https://api.polygonscan.com/api",
+        explorer_api_base="https://api.etherscan.io/v2/api?chainid=137",
         block_time_sec=2.1,
         gas_profile="Low gas chain with periodic contention spikes from campaign activity.",
     ),
 }
+
+SUPPORTED_CHAINS: List[str] = sorted(CHAIN_REGISTRY.keys())
 
 
 def normalize_chain_name(chain: str) -> str:
@@ -81,7 +83,7 @@ def get_chain_config(chain: str) -> ChainConfig:
 def list_supported_chains() -> List[str]:
     """List supported canonical chain names."""
 
-    return sorted(CHAIN_REGISTRY.keys())
+    return list(SUPPORTED_CHAINS)
 
 
 def detect_cross_chain_coordination(
@@ -241,6 +243,7 @@ def attach_chain_defaults(transactions: pd.DataFrame, chain: str) -> pd.DataFram
 __all__ = [
     "ChainConfig",
     "CHAIN_REGISTRY",
+    "SUPPORTED_CHAINS",
     "normalize_chain_name",
     "get_chain_config",
     "list_supported_chains",

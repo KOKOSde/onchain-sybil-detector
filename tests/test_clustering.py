@@ -1,6 +1,6 @@
 from sklearn.metrics import precision_recall_fscore_support
 
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector import SybilDetector, extract_features
 
 

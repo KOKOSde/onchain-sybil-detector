@@ -1,4 +1,4 @@
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector.airdrop_hunter_osd import (
     detect_campaign_participants,
     run_airdrop_hunter,

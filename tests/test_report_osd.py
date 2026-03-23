@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 
-from datasets.synthetic_generator import generate_synthetic_sybil_network
+from sybil_detector.datasets.synthetic_generator import generate_synthetic_sybil_network
 from sybil_detector import SybilDetector, extract_features
 from sybil_detector.report_osd import build_cluster_report_rows, generate_analyst_reports, generate_report
 

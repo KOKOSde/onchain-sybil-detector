@@ -1,0 +1,9 @@
+$ python3 -m sybil_detector.cli_osd scan --addresses /tmp/osd_synthetic.csv --chain eth --out /tmp/osd_report.html
+{"output": "/tmp/osd_report.html", "clusters": 5}
+$ python3 - <<"PY"
+from pathlib import Path
+html = Path("/tmp/osd_report.html").read_text()
+print("clusters_tag", "Clusters analyzed:" in html)
+print("has_graph", "vis.Network" in html)
+clusters_tag True
+has_graph True

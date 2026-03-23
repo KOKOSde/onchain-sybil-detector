@@ -1,0 +1,12 @@
+$ python3 -m sybil_detector.cli_osd simulate --difficulty 1 --num-clusters 5 --wallets-per-cluster 10 --out /tmp/osd_synthetic.csv
+{"transactions": "/tmp/osd_synthetic.csv", "labels": "/tmp/osd_synthetic_labels.csv", "rows": 14536}
+$ python3 - <<"PY"
+import pandas as pd
+tx = pd.read_csv("/tmp/osd_synthetic.csv")
+print(tx.shape)
+print(tx[["address","tx_hash","timestamp"]].head(3).to_string(index=False))
+(14536, 11)
+                                   address                                                            tx_hash  timestamp
+0x0000000000000000000000000000000000a00000 0x0000002a000000000000000000000000000000000000000000000000000019f7 1704068565
+0x0000000000000000000000000000000000f00000 0x0000002a000000000000000000000000000000000000000000000000000019f7 1704068565
+0x0000000000000000000000000000000000a00001 0x0000002a00000000000000000000000000000000000000000000000000001a06 1704068759
