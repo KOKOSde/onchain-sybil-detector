@@ -6,7 +6,7 @@ VERIFICATION ATTEMPT 1
 platform linux -- Python 3.9.20, pytest-8.4.2, pluggy-1.6.0
 collected 51 items
 ...
-======================== 51 passed in 137.22s (0:02:17) ========================
+======================== 51 passed in 138.94s (0:02:18) ========================
 --- Step 2: README snippets ---
 Found 3 Python snippets
 Snippet 1: PASS (474 bytes output)
@@ -23,11 +23,7 @@ PASS: All adversarial table numbers match
 PASS: Fetched 5 real transactions with hashes
 --- Step 6: Red flags ---
 PASS: No hardcoded API keys
-WARN: Placeholder text found
-src/sybil_detector/data_ingestion.py:526:        placeholders = ",".join(["?"] * len(addresses))
-src/sybil_detector/data_ingestion.py:531:        ).format(placeholders)
-src/sybil_detector/data_ingestion.py:569:        placeholders = ",".join(["?"] * len(addresses))
-src/sybil_detector/data_ingestion.py:573:        ).format(placeholders)
+PASS: No placeholder/TODO/FIXME markers
 --- Step 7: Explainer false positive ---
 PASS: Fake wallets got confidence 0.0
 --- Step 8: Report graph ---

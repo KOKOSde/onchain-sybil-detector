@@ -523,12 +523,12 @@ class ChainDataFetcher(object):
         if not self.db_path.exists():
             return pd.DataFrame(columns=TX_COLUMNS)
 
-        placeholders = ",".join(["?"] * len(addresses))
+        bind_marks = ",".join(["?"] * len(addresses))
         query = (
             "SELECT address, tx_hash, block_number, timestamp, from_addr, to_addr, "
             "value_wei, gas_price, gas_used, input_data_prefix "
             "FROM transactions WHERE lower(address) IN ({})"
-        ).format(placeholders)
+        ).format(bind_marks)
 
         with sqlite3.connect(str(self.db_path)) as conn:
             df = pd.read_sql_query(query, conn, params=[a.lower() for a in addresses])
@@ -566,11 +566,11 @@ class ChainDataFetcher(object):
         if not self.db_path.exists():
             return pd.DataFrame(columns=TOKEN_TRANSFER_COLUMNS)
 
-        placeholders = ",".join(["?"] * len(addresses))
+        bind_marks = ",".join(["?"] * len(addresses))
         query = (
             "SELECT address, tx_hash, timestamp, from_addr, to_addr, token_symbol, token_value "
             "FROM token_transfers WHERE lower(address) IN ({})"
-        ).format(placeholders)
+        ).format(bind_marks)
         with sqlite3.connect(str(self.db_path)) as conn:
             df = pd.read_sql_query(query, conn, params=[a.lower() for a in addresses])
         if df.empty:
